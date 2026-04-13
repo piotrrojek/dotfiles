@@ -1,0 +1,58 @@
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
+
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+
+# claude settings
+export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+
+yt_to_srt() {
+  local url="$1"
+  local output_base="$2"
+  local language="${3:-en}"
+
+  yt-dlp -x --audio-format wav --postprocessor-args "-ar 16000" -o "$output_base.wav" "$url"
+  whisper-cli --language "$language" --model "/Users/piotrrojek/whisper-models/ggml-large-v3-turbo.bin" --split-on-word --max-len 65 --output-vtt --output-file "$output_base" --file "$output_base.wav"
+  rm "$output_base.wav"
+}
+
+file_to_srt() {
+  local filepath="$1"
+  local language="${2:-en}"
+
+  local filename=$(basename "$filepath")
+  local filename_no_ext="${filename%.*}"
+  local output_base="$filename_no_ext"
+  local temp_wav="$output_base.wav"
+
+  ffmpeg -i "$filepath" -vn -acodec pcm_s16le -ar 16000 -ac 1 "$temp_wav"
+
+  whisper-cli --language "$language" --model "/Users/piotrrojek/whisper-models/ggml-large-v3-turbo.bin" --split-on-word --max-len 65 --output-vtt --output-file "$output_base" --file "$temp_wav"
+  rm "$temp_wav"
+}
+
+export GITHUB_READ_PAT="{{ output "icloud-keychain" "get" "dotfiles/github-read-pat" "piotrrojek" | trim }}"
+export GITHUB_PAT="{{ output "icloud-keychain" "get" "dotfiles/github-pat" "piotrrojek" | trim }}"
+export HF_TOKEN="{{ output "icloud-keychain" "get" "dotfiles/huggingface-token" "piotrrojek" | trim }}"
+
+vllm-gemma4() {
+  vllm-mlx serve mlx-community/gemma-4-26b-a4b-it-4bit \
+    --host 127.0.0.1 \
+    --port 8001 \
+    --reasoning-parser gemma4 \
+    --enable-auto-tool-choice \
+    --tool-call-parser gemma4 \
+    "$@"
+}
+
+claude-local() {
+  env \
+    ANTHROPIC_BASE_URL=http://0.0.0.0:8001 \
+    ANTHROPIC_API_KEY=not-needed \
+    ANTHROPIC_MODEL=mlx-community/gemma-4-26b-a4b-it-4bit \
+    ANTHROPIC_SMALL_FAST_MODEL=mlx-community/gemma-4-26b-a4b-it-4bit \
+    claude "$@"
+}
+
+eval "$(starship init zsh)"
