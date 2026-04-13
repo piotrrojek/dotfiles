@@ -30,6 +30,8 @@ brew "yt-dlp"
 brew "zig"
 brew "icloud-keychain"
 brew "hf"
+brew "nmap"
+brew "sshpass"
 
 
 # Apps
