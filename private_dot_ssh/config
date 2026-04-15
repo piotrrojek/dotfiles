@@ -6,3 +6,12 @@ Include ~/.orbstack/ssh/config
 Host *
   AddKeysToAgent yes
   IdentityFile ~/.ssh/id_ed25519
+
+Host gpuws
+  HostName gpuws.tail.appliedai.dev
+  User otherland
+
+Host edge
+  HostName edge.tail.appliedai.dev
+  User otherland
+  IdentityFile ~/Desktop/keys/id_ed2219

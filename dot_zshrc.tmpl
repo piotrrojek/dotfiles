@@ -46,6 +46,10 @@ vllm-gemma4() {
     "$@"
 }
 
+headscale() {
+  kubectl -n headscale exec -i headscale-0 -- headscale "$@"
+}
+
 claude-local() {
   env \
     ANTHROPIC_BASE_URL=http://0.0.0.0:8001 \
