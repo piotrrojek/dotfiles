@@ -35,6 +35,8 @@ file_to_srt() {
 export GITHUB_READ_PAT="{{ output "icloud-keychain" "get" "dotfiles/github-read-pat" "piotrrojek" | trim }}"
 export GITHUB_PAT="{{ output "icloud-keychain" "get" "dotfiles/github-pat" "piotrrojek" | trim }}"
 export HF_TOKEN="{{ output "icloud-keychain" "get" "dotfiles/huggingface-token" "piotrrojek" | trim }}"
+export CLOUDFLARE_EMAIL=piotr@otherlandlabs.com
+export CLOUDFLARE_API_KEY="{{ output "icloud-keychain" "get" "dotfiles/cloudflare-api-key" "piotrrojek" | trim }}"
 
 vllm-gemma4() {
   vllm-mlx serve mlx-community/gemma-4-26b-a4b-it-4bit \
