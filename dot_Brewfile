@@ -36,7 +36,6 @@ brew "virtctl"
 brew "poppler"
 brew "jq"
 
-
 # Apps
 cask "ghostty"
 cask "orbstack"
