@@ -80,4 +80,6 @@ claude-qwen3() {
     claude "$@"
 }
 
-eval "$(starship init zsh)"
+if [[ -z "$SSH_CONNECTION" && -z "$SSH_TTY" ]]; then
+    eval "$(starship init zsh)"
+fi
