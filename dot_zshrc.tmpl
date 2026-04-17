@@ -40,7 +40,7 @@ export CLOUDFLARE_API_KEY="{{ output "icloud-keychain" "get" "dotfiles/cloudflar
 
 vllm-gemma4() {
   vllm-mlx serve mlx-community/gemma-4-26b-a4b-it-4bit \
-    --host 127.0.0.1 \
+    --host 0.0.0.0 \
     --port 8001 \
     --reasoning-parser gemma4 \
     --enable-auto-tool-choice \
@@ -50,7 +50,7 @@ vllm-gemma4() {
 
 vllm-qwen3() {
   vllm-mlx serve mlx-community/Qwen3.6-35B-A3B-4bit \
-    --host 127.0.0.1 \
+    --host 0.0.0.0 \
     --port 8002 \
     --reasoning-parser qwen3 \
     --enable-auto-tool-choice \
