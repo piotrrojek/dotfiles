@@ -1,5 +1,5 @@
 #!/bin/bash
-# Install vllm-mlx and pre-download the Gemma 4 26B A4B 4bit model.
+# Install vllm-mlx and pre-download the MLX-quantized chat models we serve locally.
 # Apple Silicon Macs only — the whole stack relies on MLX/Metal.
 # Runs after the Brewfile so `uv` and `hf` are guaranteed available.
 
@@ -22,17 +22,26 @@ else
   uv tool install git+https://github.com/waybarrios/vllm-mlx.git
 fi
 
-MODEL="mlx-community/gemma-4-26b-a4b-it-4bit"
-MODEL_DIR="$HOME/.cache/huggingface/hub/models--${MODEL//\//--}"
+# (model repo id, approx size for log message)
+MODELS=(
+  "mlx-community/gemma-4-26b-a4b-it-4bit|~14 GB"
+  "mlx-community/Qwen3.6-35B-A3B-4bit|~19 GB"
+)
 
-if [ -d "$MODEL_DIR" ]; then
-  echo "Model $MODEL already cached, skipping download."
-elif command -v hf &>/dev/null; then
-  echo "Downloading $MODEL (~14 GB, this will take a while)..."
-  hf download "$MODEL"
-else
-  echo "vllm-mlx: hf CLI not found — skipping model pre-download."
-  echo "          Run 'hf download $MODEL' manually, or vllm-mlx will fetch on first serve."
-fi
+for entry in "${MODELS[@]}"; do
+  MODEL="${entry%%|*}"
+  SIZE="${entry##*|}"
+  MODEL_DIR="$HOME/.cache/huggingface/hub/models--${MODEL//\//--}"
 
-echo "vllm-mlx setup complete. Start the server with: vllm-gemma4"
+  if [ -d "$MODEL_DIR" ]; then
+    echo "Model $MODEL already cached, skipping download."
+  elif command -v hf &>/dev/null; then
+    echo "Downloading $MODEL ($SIZE, this will take a while)..."
+    hf download "$MODEL"
+  else
+    echo "vllm-mlx: hf CLI not found — skipping model pre-download."
+    echo "          Run 'hf download $MODEL' manually, or vllm-mlx will fetch on first serve."
+  fi
+done
+
+echo "vllm-mlx setup complete. Start servers with: vllm-gemma4 (port 8001) or vllm-qwen3 (port 8002)"
