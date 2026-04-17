@@ -70,9 +70,8 @@ headscale() {
 }
 
 claude-local() {
-  local host="${CLAUDE_BACKEND_HOST:-localhost}"
   env \
-    ANTHROPIC_BASE_URL="http://${host}:8001" \
+    ANTHROPIC_BASE_URL="http://mac-mini-piotr:8001" \
     ANTHROPIC_API_KEY=not-needed \
     ANTHROPIC_MODEL=mlx-community/gemma-4-26b-a4b-it-4bit \
     ANTHROPIC_SMALL_FAST_MODEL=mlx-community/gemma-4-26b-a4b-it-4bit \
@@ -80,9 +79,8 @@ claude-local() {
 }
 
 claude-qwen3() {
-  local host="${CLAUDE_BACKEND_HOST:-localhost}"
   env \
-    ANTHROPIC_BASE_URL="http://${host}:8002" \
+    ANTHROPIC_BASE_URL="http://mac-mini-piotr:8002" \
     ANTHROPIC_API_KEY=not-needed \
     ANTHROPIC_MODEL=mlx-community/Qwen3.6-35B-A3B-4bit \
     ANTHROPIC_SMALL_FAST_MODEL=mlx-community/Qwen3.6-35B-A3B-4bit \
