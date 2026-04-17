@@ -1,5 +1,6 @@
 # Taps
 tap "piotrrojek/tap"
+tap "anomalyco/tap"
 
 # CLI tools
 brew "bash"
@@ -31,6 +32,7 @@ brew "zig"
 brew "icloud-keychain"
 brew "hf"
 brew "nmap"
+brew "opencode"
 brew "sshpass"
 brew "virtctl"
 brew "jq"
