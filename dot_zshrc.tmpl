@@ -89,6 +89,10 @@ claude-qwen3() {
     claude "$@"
 }
 
+opencode-qwen3() {
+  opencode -m vllm-mlx/mlx-community/Qwen3.6-35B-A3B-4bit "$@"
+}
+
 if [[ -z "$SSH_CONNECTION" && -z "$SSH_TTY" ]]; then
     eval "$(starship init zsh)"
 fi
