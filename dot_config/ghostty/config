@@ -1,0 +1,7 @@
+theme = catppuccin-frappe.conf
+
+keybind = super+shift+a=new_split:auto
+keybind = super+shift+s=toggle_split_zoom
+
+# auto-install terminfo + forward TERM env vars on SSH so remote shells render correctly
+shell-integration-features = ssh-env,ssh-terminfo
