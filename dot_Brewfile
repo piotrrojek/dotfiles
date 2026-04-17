@@ -33,7 +33,6 @@ brew "hf"
 brew "nmap"
 brew "sshpass"
 brew "virtctl"
-brew "poppler"
 brew "jq"
 
 # Apps

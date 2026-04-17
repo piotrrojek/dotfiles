@@ -7,13 +7,15 @@ export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 # claude settings
 export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 
+export WHISPER_MODEL="${WHISPER_MODEL:-$HOME/whisper-models/ggml-large-v3-turbo.bin}"
+
 yt_to_srt() {
   local url="$1"
   local output_base="$2"
   local language="${3:-en}"
 
   yt-dlp -x --audio-format wav --postprocessor-args "-ar 16000" -o "$output_base.wav" "$url"
-  whisper-cli --language "$language" --model "/Users/piotrrojek/whisper-models/ggml-large-v3-turbo.bin" --split-on-word --max-len 65 --output-vtt --output-file "$output_base" --file "$output_base.wav"
+  whisper-cli --language "$language" --model "$WHISPER_MODEL" --split-on-word --max-len 65 --output-vtt --output-file "$output_base" --file "$output_base.wav"
   rm "$output_base.wav"
 }
 
@@ -28,7 +30,7 @@ file_to_srt() {
 
   ffmpeg -i "$filepath" -vn -acodec pcm_s16le -ar 16000 -ac 1 "$temp_wav"
 
-  whisper-cli --language "$language" --model "/Users/piotrrojek/whisper-models/ggml-large-v3-turbo.bin" --split-on-word --max-len 65 --output-vtt --output-file "$output_base" --file "$temp_wav"
+  whisper-cli --language "$language" --model "$WHISPER_MODEL" --split-on-word --max-len 65 --output-vtt --output-file "$output_base" --file "$temp_wav"
   rm "$temp_wav"
 }
 
