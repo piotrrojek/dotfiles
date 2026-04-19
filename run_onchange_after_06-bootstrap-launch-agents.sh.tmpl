@@ -1,0 +1,46 @@
+#!/bin/bash
+# Bootstrap the user LaunchAgents we manage.
+#
+# Why run_onchange rather than run_once: we want launchctl bootstrap to re-run
+# whenever a plist's *content* changes (so the scheduled job uses the updated
+# definition), not just once per machine. Chezmoi hashes the fully-rendered
+# script — the include+sha256sum line below bakes each plist's content hash
+# into the comment, so editing a plist triggers a re-run.
+#
+# Plist content hashes (change on edit, triggering a re-run):
+#   secondbrain-chart-rotation: {{ include "Library/LaunchAgents/com.piotrrojek.secondbrain-chart-rotation.plist" | sha256sum }}
+
+set -euo pipefail
+
+UID_NUM=$(id -u)
+DOMAIN="gui/$UID_NUM"
+AGENTS_DIR="$HOME/Library/LaunchAgents"
+
+# Label -> plist filename. Add new agents here.
+declare -a AGENTS=(
+  "com.piotrrojek.secondbrain-chart-rotation"
+)
+
+# Gate: the chart-rotation agent requires the secondbrain vault to be cloned.
+# Skip the whole bootstrap if it's missing so a fresh machine doesn't spam
+# launchd errors before run_once_after_02-clone-secondbrain.sh has finished.
+if [[ ! -d "$HOME/Desktop/secondbrain" ]]; then
+  echo "launch-agents: ~/Desktop/secondbrain missing — skipping bootstrap until it's cloned."
+  exit 0
+fi
+
+mkdir -p "$HOME/Library/Logs"
+
+for label in "${AGENTS[@]}"; do
+  plist="$AGENTS_DIR/$label.plist"
+  if [[ ! -f "$plist" ]]; then
+    echo "launch-agents: $plist missing — did chezmoi apply fail?"
+    continue
+  fi
+
+  # bootout is a no-op if the agent isn't loaded, but logs noise. Swallow.
+  launchctl bootout "$DOMAIN/$label" 2>/dev/null || true
+  launchctl bootstrap "$DOMAIN" "$plist"
+  launchctl enable "$DOMAIN/$label"
+  echo "launch-agents: (re)loaded $label"
+done
