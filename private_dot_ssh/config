@@ -3,10 +3,31 @@
 # This won't be added again if you remove it.
 Include ~/.orbstack/ssh/config
 
+# ---------------------------------------------------------------------------
+# Defaults for every host
+# ---------------------------------------------------------------------------
 Host *
   AddKeysToAgent yes
+  # macOS keychain integration: `IgnoreUnknown UseKeychain` lets this config
+  # stay portable to Linux (where `UseKeychain` is unknown) via chezmoi.
+  IgnoreUnknown UseKeychain
+  UseKeychain yes
   IdentityFile ~/.ssh/id_ed25519
 
+  # Keep sessions alive through NAT / laptop sleep
+  ServerAliveInterval 60
+  ServerAliveCountMax 3
+
+  # Connection multiplexing — first connection opens a master, subsequent
+  # ssh/scp/rsync to the same host reuse it (instant).
+  # ~/.ssh/cm must exist with mode 700; created by run_once_after_01-setup-ssh-agent.sh
+  ControlMaster auto
+  ControlPath ~/.ssh/cm/%r@%h:%p
+  ControlPersist 10m
+
+# ---------------------------------------------------------------------------
+# Hosts
+# ---------------------------------------------------------------------------
 Host gpuws
   HostName gpuws.tail.appliedai.dev
   User otherland
@@ -14,4 +35,10 @@ Host gpuws
 Host edge
   HostName edge.tail.appliedai.dev
   User otherland
-  IdentityFile ~/Desktop/keys/id_ed2219
+  IdentityFile ~/.ssh/id_ed25519_edge
+  IdentitiesOnly yes
+
+# mac-mini-piotr is a Headscale/Tailscale MagicDNS name — reachable over the
+# tailnet. Also the host that vllm-gemma4 / vllm-qwen3 bind 8001/8002 on.
+Host mac-mini-piotr
+  User piotrrojek

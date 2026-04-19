@@ -1,1 +1,28 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editors / IDEs
+*.swp
+*.swo
+.idea/
+.vscode/
+*.sublime-workspace
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.python-version
+
+# Node
+node_modules/
+.npm/
+
+# Direnv
+.envrc.local
+
+# Claude Code local overrides
 **/.claude/settings.local.json

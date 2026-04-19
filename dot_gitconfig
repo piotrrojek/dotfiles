@@ -1,3 +1,91 @@
 [user]
 	name = Piotr Rojek
 	email = contact@piotrrojek.io
+	signingkey = ~/.ssh/id_ed25519.pub
+
+# SSH-based commit signing — no GPG setup needed.
+# After chezmoi apply, upload ~/.ssh/id_ed25519.pub on GitHub:
+#   Settings → SSH and GPG keys → New SSH key → Key type: "Signing Key"
+# (Same public key you use for auth, just added a second time as a signing key.)
+[gpg]
+	format = ssh
+[commit]
+	gpgsign = true
+[tag]
+	gpgsign = true
+
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = true
+	ff = only
+
+[push]
+	default = current
+	autoSetupRemote = true
+	followTags = true
+
+[fetch]
+	prune = true
+	pruneTags = true
+
+[rebase]
+	autoStash = true
+	autoSquash = true
+	updateRefs = true
+
+[rerere]
+	enabled = true
+	autoUpdate = true
+
+[diff]
+	algorithm = histogram
+	colorMoved = default
+	renames = copies
+
+[merge]
+	conflictstyle = zdiff3
+
+[branch]
+	sort = -committerdate
+
+[tag]
+	sort = version:refname
+
+[column]
+	ui = auto
+
+[log]
+	date = iso
+
+# delta = side-by-side git diff with syntax highlighting.
+# Installed via Brewfile; falls back to less if delta is absent.
+[core]
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	line-numbers = true
+	side-by-side = false
+	syntax-theme = Catppuccin-frappe
+
+[alias]
+	st = status -sb
+	co = checkout
+	sw = switch
+	br = branch
+	ci = commit
+	cim = commit -m
+	amend = commit --amend --no-edit
+	# git-absorb: auto-fixup staged changes into the right earlier commit
+	# and immediately rebase them into place. Requires `brew "git-absorb"`.
+	ab = absorb --and-rebase
+	last = log -1 HEAD --stat
+	lg = log --oneline --graph --decorate --all -n 30
+	unstage = reset HEAD --
+	undo = reset --soft HEAD^
+	root = rev-parse --show-toplevel

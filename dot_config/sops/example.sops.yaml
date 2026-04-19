@@ -1,0 +1,28 @@
+# Copy this file into a project's root as `.sops.yaml` (committable).
+# Tune `path_regex` and `encrypted_regex` per project.
+#
+# Workflow:
+#   sops -e -i secret.secrets.yaml   # encrypt in place
+#   sops    secret.secrets.yaml      # decrypt-edit-reencrypt in $EDITOR
+#   sops -d secret.secrets.yaml      # decrypt to stdout
+#   sops -d secret.secrets.yaml | kubectl apply -f -
+#
+# Private key lives at ~/.config/sops/age/keys.txt (chezmoi-managed from
+# iCloud Keychain entry `dotfiles/sops-age-keys`). `SOPS_AGE_KEY_FILE` in
+# .zshrc points sops at it automatically.
+#
+# To add a new recipient (e.g. a new machine, a teammate, a cluster
+# controller's age key) later: append to the `age:` list below and run
+# `sops updatekeys <file>` for each encrypted file.
+
+creation_rules:
+  # Any *.secrets.yaml file anywhere in the repo
+  - path_regex: \.secrets\.yaml$
+    # Only encrypt *values* of these keys — keep structure readable in diffs.
+    # Covers k8s Secret {data,stringData} + common env-style names.
+    encrypted_regex: "^(data|stringData|password|passphrase|token|api[-_]?key|secret|.*_KEY|.*_SECRET|.*_TOKEN|.*_PASSWORD)$"
+    age: age1a4gg57t6535f8tw2lqppkwagnpcchy650s3uz7le5uwn457pgcas3wexe4
+
+  # Plain .env.secrets files — encrypt all values
+  - path_regex: \.env\.secrets$
+    age: age1a4gg57t6535f8tw2lqppkwagnpcchy650s3uz7le5uwn457pgcas3wexe4

@@ -1,7 +1,44 @@
 theme = catppuccin-frappe.conf
 
+# ---------------------------------------------------------------------------
+# macOS behavior
+# ---------------------------------------------------------------------------
+# Treat LEFT option as Alt so Alt+arrow / Alt+b/f (word jumps in zsh) actually work.
+# Right option stays native so right-Alt+a/z/x/e/l/o/… still types Polish letters
+# (ą ź ć ę ł ó …). Using `true` here breaks Polish input on both Option keys.
+macos-option-as-alt = left
+
+# Don't prompt when closing a window / tab / split
+confirm-close-surface = false
+
+# ---------------------------------------------------------------------------
+# Buffer & editing
+# ---------------------------------------------------------------------------
+scrollback-limit = 100000
+copy-on-select = clipboard
+
+# ---------------------------------------------------------------------------
+# Cursor
+# ---------------------------------------------------------------------------
+cursor-style = bar
+cursor-style-blink = false
+
+# ---------------------------------------------------------------------------
+# Keybindings
+# ---------------------------------------------------------------------------
+# Splits
 keybind = super+shift+a=new_split:auto
 keybind = super+shift+s=toggle_split_zoom
+keybind = super+shift+h=goto_split:left
+keybind = super+shift+l=goto_split:right
+keybind = super+shift+k=goto_split:up
+keybind = super+shift+j=goto_split:down
 
+# Quick terminal — drop-down from anywhere on macOS (tmux killer)
+keybind = global:cmd+grave_accent=toggle_quick_terminal
+
+# ---------------------------------------------------------------------------
+# Shell integration
+# ---------------------------------------------------------------------------
 # auto-install terminfo + forward TERM env vars on SSH so remote shells render correctly
 shell-integration-features = ssh-env,ssh-terminfo

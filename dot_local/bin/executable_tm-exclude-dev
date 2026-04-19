@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# tm-exclude-dev — (re)apply Time Machine exclusions for dev caches.
+#
+# `tmutil addexclusion` is sticky-by-inode, so after operations that
+# recreate build/dep directories (npm install, rm -rf node_modules,
+# fresh clone, cargo clean + build), exclusions need to be re-applied.
+# Run this periodically or right after a big reinstall.
+#
+# Covers:
+#   - Fixed paths: ~/.cache, ~/Library/Caches, Xcode DerivedData, OrbStack
+#   - Dev tree scan ($DEV_ROOT, default ~/Desktop/development) for:
+#     node_modules, .venv, venv, target, .next, dist, build,
+#     __pycache__, .gradle, DerivedData, .build
+#
+# Usage:
+#   tm-exclude-dev                 # full refresh
+#   tm-exclude-dev --dev-only      # skip fixed paths (fast)
+#   tm-exclude-dev --dry-run       # print what would change
+#   DEV_ROOT=~/code tm-exclude-dev # scan a different tree
+
+set -euo pipefail
+
+DEV_ROOT="${DEV_ROOT:-$HOME/Desktop/development}"
+DRY=0
+DEV_ONLY=0
+
+for arg in "$@"; do
+  case "$arg" in
+    --dev-only)   DEV_ONLY=1 ;;
+    --dry-run|-n) DRY=1 ;;
+    -h|--help)
+      sed -n 's/^# \{0,1\}//p; 1,/^$/!d' "$0" | head -n 20
+      exit 0 ;;
+    *) echo "tm-exclude-dev: unknown arg: $arg" >&2; exit 2 ;;
+  esac
+done
+
+FIXED=(
+  "$HOME/.cache"
+  "$HOME/Library/Caches"
+  "$HOME/Library/Group Containers/HUAQ24HBR6.dev.orbstack"
+  "$HOME/Library/Developer/Xcode/DerivedData"
+)
+
+DEV_DIRNAMES=(node_modules .venv venv target .next dist build __pycache__ .gradle DerivedData .build)
+
+added=0
+kept=0
+skipped=0
+failed=0
+
+ensure_excluded() {
+  local p="$1"
+  if [ ! -e "$p" ]; then
+    printf '  [skip] %s\n' "$p"
+    skipped=$((skipped+1))
+    return
+  fi
+  if tmutil isexcluded "$p" 2>/dev/null | grep -q '\[Excluded\]'; then
+    printf '  [keep] %s\n' "$p"
+    kept=$((kept+1))
+    return
+  fi
+  if [ "$DRY" -eq 1 ]; then
+    printf '  [dry]  %s\n' "$p"
+    added=$((added+1))
+    return
+  fi
+  if tmutil addexclusion "$p" >/dev/null 2>&1; then
+    printf '  [add]  %s\n' "$p"
+    added=$((added+1))
+  else
+    printf '  [FAIL] %s\n' "$p"
+    failed=$((failed+1))
+  fi
+}
+
+if [ "$DEV_ONLY" -eq 0 ]; then
+  echo "=== Fixed paths ==="
+  for p in "${FIXED[@]}"; do ensure_excluded "$p"; done
+  echo
+fi
+
+echo "=== Dev-tree scan ($DEV_ROOT) ==="
+if [ ! -d "$DEV_ROOT" ]; then
+  echo "  (not a directory — skipping)"
+else
+  find_expr=()
+  for n in "${DEV_DIRNAMES[@]}"; do
+    find_expr+=(-name "$n" -o)
+  done
+  # drop trailing -o
+  unset 'find_expr[${#find_expr[@]}-1]'
+
+  while IFS= read -r dir; do
+    ensure_excluded "$dir"
+  done < <(find "$DEV_ROOT" \( "${find_expr[@]}" \) -type d -prune 2>/dev/null)
+fi
+
+echo
+echo "=== Summary ==="
+printf '  added:   %d\n' "$added"
+printf '  already: %d\n' "$kept"
+printf '  skipped: %d\n' "$skipped"
+[ "$failed" -gt 0 ] && printf '  FAILED:  %d\n' "$failed"
+[ "$DRY" -eq 1 ] && echo '  (dry run — nothing changed)'
+
+exit 0
